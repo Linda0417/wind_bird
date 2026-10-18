@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>风之飞鸟-Linda0417</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg:#ffffff;
+            --text:#222222;
+            --font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+            --font-size:16px;
+        }
+        html {
+            transition: font-size 0.25s ease;
+        }
+        body{
+            background:var(--bg);
+            color:var(--text);
+            font-family: var(--font-family);
+            transition: background 0.3s, color 0.3s;
+            min-height:100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        body.dark{--bg:#111;--text:#eee;}
+        body.beige{--bg:#FFFAE8;}
+        body.eyegreen{--bg:#e0efca;}
+        header{
+            padding:10px 14px;
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            align-items:center;
+            justify-content:space-between;
+            border-bottom:1px solid #ddd;
+            position:sticky;
+            top:0;
+            background:inherit;
+            z-index:10;
+        }
+        .site-info{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+        .site-info h2{font-size:1.1rem;font-weight:300;}
+        .site-slogan{height:28px}
+        .header-actions{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+        button{
+            padding:5px 8px;
+            border-radius:6px;
+            border:none;
+            cursor:pointer;
+            background:transparent;
+            color:inherit;
+            font-size:14px;
+        }
+        button:hover{
+            background:#DFE6E4;
+            color:#547968;
+        }
+        body.dark button:hover{
+            background:#000000;
+            color:#DFE6E4;
+        }
+        select{padding:4px;font-size:14px}
+        .container{display:flex;gap:12px;padding:12px}
+        .sidebar{width:220px;min-width:180px;border-right:1px solid #ddd;padding:10px;height:calc(100vh - 72px);overflow:auto}
+        .read-wrap{flex:1;padding:10px;overflow:auto;height:calc(100vh - 72px)}
+        #article{
+            line-height:1.8;
+            font-family: inherit;
+            font-size: var(--font-size);
+            max-width:800px;
+            transition: font-size 0.25s ease;
+        }
+        #article h1{margin:16px 0 10px;font-size:calc(var(--font-size) + 10px);font-weight:300;}
+        #article h2{margin:14px 0 8px;font-size:calc(var(--font-size) + 5px);font-weight:300;}
+        .hidden{display:none!important}
+        #l2d-container{position:fixed;right:0px;bottom:0;z-index:8}
+        .l2d-ctrl{position:fixed;z-index:9;bottom:12px;right:230px;}
+
+        @media(max-width:720px){
+            .container{flex-direction:column;padding:8px;gap:8px}
+            .sidebar{
+                width:100%;
+                height:auto;
+                max-height:180px;
+                border-right:none;
+                border-bottom:1px solid #ddd;
+            }
+            .read-wrap{height:auto;min-height:calc(100vh - 240px);}
+            #l2d-container{transform:scale(0.42);transform-origin:right bottom;right:-40px;bottom:0}
+            .l2d-ctrl{right:10px;bottom:6px;}
+            .l2d-ctrl button{font-size:12px;padding:4px 6px;}
+            .site-info h2{font-size:1rem;}
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="site-info">
+            <h2>风之飞鸟-Linda0417</h2>
+            <img class="site-slogan" src="logo.png">
+        </div>
+        <div class="header-actions">
+            <select id="bgSelect">
+                <option value="">白色背景</option>
+                <option value="beige">米色</option>
+                <option value="eyegreen">护眼绿</option>
+                <option value="dark">深色</option>
+            </select>
+            <!-- 扩充多套系统字体，无站酷、无外部字体 -->
+            <select id="fontSelect">
+                <option value='"PingFang SC","Microsoft YaHei",sans-serif' selected>苹方细黑体(默认)</option>
+                <option value='"Microsoft YaHei",sans-serif'>微软雅黑</option>
+                <option value='"Microsoft YaHei Light",sans-serif'>微软雅黑‑细体</option>
+                <option value='"SimSun",serif'>系统宋体</option>
+                <option value='"KaiTi",serif'>系统楷体</option>
+                <option value='"FangSong",serif'>系统仿宋</option>
+                <option value='"Noto Sans SC",sans-serif'>思源黑体(本地已装才生效)</option>
+                <option value='"Noto Serif SC",serif'>思源宋体(本地已装才生效)</option>
+            </select>
+            <select id="fontSizeSelect">
+                <option value="15">15px</option>
+                <option value="16" selected>16px</option>
+                <option value="18">18px</option>
+                <option value="20">20px</option>
+            </select>
+            <button id="btnJump">跳转位置</button>
+        </div>
+    </header>
+    <div class="container">
+        <aside class="sidebar">
+            <h4>目录</h4>
+            <div id="toc"></div>
+        </aside>
+        <main class="read-wrap">
+            <div id="article"></div>
+        </main>
+    </div>
+    <div id="l2d-container"></div>
+    <div class="l2d-ctrl">
+        <button id="toggleL2D">隐藏猫猫</button>
+    </div>
+
+<script src="https://unpkg.com/live2d-widget@3.1.4/lib/L2Dwidget.min.js"></script>
+<script>
+// 将你的markdown粘贴在反引号内部
+let articleMd = `
+# 一级标题示例
+## 二级标题示例
+正文内容写在这里。
+`;
+
+let l2dShow = true;
+
+function applyStyle(){
+    const bg = localStorage.getItem("bg") || "";
+    const font = localStorage.getItem("font") || '"PingFang SC","Microsoft YaHei",sans-serif';
+    const fsize = localStorage.getItem("fontSize") || "16";
+    document.body.className = bg;
+    document.documentElement.style.setProperty("--font-family", font);
+    document.documentElement.style.setProperty("--font-size", fsize+"px");
+
+    document.getElementById("bgSelect").value = bg;
+    document.getElementById("fontSelect").value = font;
+    document.getElementById("fontSizeSelect").value = fsize;
+}
+
+document.getElementById("bgSelect").onchange = function(){
+    localStorage.setItem("bg",this.value);applyStyle();
+}
+document.getElementById("fontSelect").onchange = function(){
+    localStorage.setItem("font",this.value);applyStyle();
+}
+document.getElementById("fontSizeSelect").onchange = function(){
+    localStorage.setItem("fontSize",this.value);applyStyle();
+}
+
+function renderArticle(){
+    const md = articleMd;
+    let html = md.replace(/^# (.*)$/gm,"<h1>$1</h1>")
+                 .replace(/^## (.*)$/gm,"<h2>$1</h2>")
+                 .replace(/\n/g,"<br>");
+    document.getElementById("article").innerHTML = html;
+    buildToc();
+}
+
+function buildToc(){
+    const tocWrap = document.getElementById("toc");
+    const headings = document.querySelectorAll("#article h1,#article h2");
+    tocWrap.innerHTML = "";
+    headings.forEach(h=>{
+        h.id = "sec_"+Math.random().toString(36).slice(2);
+        const btn = document.createElement("button");
+        btn.style.width="100%";
+        btn.style.margin="3px 0";
+        btn.innerText = h.innerText;
+        btn.onclick = ()=>h.scrollIntoView({behavior:"smooth"});
+        tocWrap.appendChild(btn);
+    })
+}
+
+const readWrapDom = document.querySelector(".read-wrap");
+function loadProgress(){
+    const savedPos = localStorage.getItem("readerScrollPos") || 0;
+    if(savedPos>0){
+        setTimeout(()=>{
+            readWrapDom.scrollTop = Number(savedPos);
+        },400)
+    }
+}
+function saveProgress(){
+    localStorage.setItem("readerScrollPos", readWrapDom.scrollTop);
+}
+setInterval(saveProgress,5*60*1000);
+
+L2Dwidget.init({
+    model: {jsonPath:"https://unpkg.com/live2d-widget-model-hijiki@1.0.5/assets/hijiki.model.json"},
+    display: {superSample:2,width:210,height:360,position:"right",hOffset:0,vOffset:-10},
+    mobile: {show: true, scale:0.42},
+    react: {opacityDefault:0.75,opacityOnHover:0.9}
+});
+
+document.getElementById("toggleL2D").onclick = function(){
+    l2dShow = !l2dShow;
+    const widgetDom = document.querySelector("#live2d-widget");
+    if(!widgetDom) return;
+    if(l2dShow){
+        widgetDom.style.display = "block";
+        this.innerText = "隐藏猫猫";
+    }else{
+        widgetDom.style.display = "none";
+        this.innerText = "显示猫猫";
+    }
+}
+
+document.getElementById("btnJump").onclick = function(){
+    const pos = prompt("输入滚动位置数字：","0");
+    if(pos!==null){
+        readWrapDom.scrollTop = Number(pos);
+    }
+}
+
+window.onload = function(){
+    applyStyle();
+    renderArticle();
+    loadProgress();
+}
+</script>
+</body>
+</html>
