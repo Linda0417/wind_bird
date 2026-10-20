@@ -76,7 +76,20 @@
         .hidden{display:none!important}
         #l2d-container{position:fixed;right:0px;bottom:0;z-index:8}
         .l2d-ctrl{position:fixed;z-index:9;bottom:12px;right:230px;}
-
+        /* 左下角极小方形按钮 */
+        .secret-btn{
+            position:fixed;
+            left:4px;
+            bottom:4px;
+            width:10px;
+            height:10px;
+            padding:0;
+            border-radius:2px;
+            background:#999;
+            opacity:0.3;
+            z-index:11;
+        }
+        .secret-btn:hover{opacity:0.6;background:#666}
         @media(max-width:720px){
             .container{flex-direction:column;padding:8px;gap:8px}
             .sidebar{
@@ -107,7 +120,6 @@
                 <option value="eyegreen">护眼绿</option>
                 <option value="dark">深色</option>
             </select>
-            <!-- 扩充多套系统字体，无站酷、无外部字体 -->
             <select id="fontSelect">
                 <option value='"PingFang SC","Microsoft YaHei",sans-serif' selected>苹方细黑体(默认)</option>
                 <option value='"Microsoft YaHei",sans-serif'>微软雅黑</option>
@@ -140,18 +152,16 @@
     <div class="l2d-ctrl">
         <button id="toggleL2D">隐藏猫猫</button>
     </div>
-
+    <!-- 左下角极小隐藏按钮 -->
+    <button class="secret-btn" id="secretBtn" title=""></button>
 <script src="https://unpkg.com/live2d-widget@3.1.4/lib/L2Dwidget.min.js"></script>
 <script>
-// 将你的markdown粘贴在反引号内部
 let articleMd = `
 # 一级标题示例
 ## 二级标题示例
 正文内容写在这里。
 `;
-
 let l2dShow = true;
-
 function applyStyle(){
     const bg = localStorage.getItem("bg") || "";
     const font = localStorage.getItem("font") || '"PingFang SC","Microsoft YaHei",sans-serif';
@@ -159,12 +169,10 @@ function applyStyle(){
     document.body.className = bg;
     document.documentElement.style.setProperty("--font-family", font);
     document.documentElement.style.setProperty("--font-size", fsize+"px");
-
     document.getElementById("bgSelect").value = bg;
     document.getElementById("fontSelect").value = font;
     document.getElementById("fontSizeSelect").value = fsize;
 }
-
 document.getElementById("bgSelect").onchange = function(){
     localStorage.setItem("bg",this.value);applyStyle();
 }
@@ -174,7 +182,6 @@ document.getElementById("fontSelect").onchange = function(){
 document.getElementById("fontSizeSelect").onchange = function(){
     localStorage.setItem("fontSize",this.value);applyStyle();
 }
-
 function renderArticle(){
     const md = articleMd;
     let html = md.replace(/^# (.*)$/gm,"<h1>$1</h1>")
@@ -183,7 +190,6 @@ function renderArticle(){
     document.getElementById("article").innerHTML = html;
     buildToc();
 }
-
 function buildToc(){
     const tocWrap = document.getElementById("toc");
     const headings = document.querySelectorAll("#article h1,#article h2");
@@ -198,7 +204,6 @@ function buildToc(){
         tocWrap.appendChild(btn);
     })
 }
-
 const readWrapDom = document.querySelector(".read-wrap");
 function loadProgress(){
     const savedPos = localStorage.getItem("readerScrollPos") || 0;
@@ -212,14 +217,12 @@ function saveProgress(){
     localStorage.setItem("readerScrollPos", readWrapDom.scrollTop);
 }
 setInterval(saveProgress,5*60*1000);
-
 L2Dwidget.init({
     model: {jsonPath:"https://unpkg.com/live2d-widget-model-hijiki@1.0.5/assets/hijiki.model.json"},
     display: {superSample:2,width:210,height:360,position:"right",hOffset:0,vOffset:-10},
     mobile: {show: true, scale:0.42},
     react: {opacityDefault:0.75,opacityOnHover:0.9}
 });
-
 document.getElementById("toggleL2D").onclick = function(){
     l2dShow = !l2dShow;
     const widgetDom = document.querySelector("#live2d-widget");
@@ -232,14 +235,16 @@ document.getElementById("toggleL2D").onclick = function(){
         this.innerText = "显示猫猫";
     }
 }
-
 document.getElementById("btnJump").onclick = function(){
     const pos = prompt("输入滚动位置数字：","0");
     if(pos!==null){
         readWrapDom.scrollTop = Number(pos);
     }
 }
-
+// 左下角隐藏按钮跳转到确认页
+document.getElementById("secretBtn").onclick = function(){
+    window.location.href = "./confirm.html";
+}
 window.onload = function(){
     applyStyle();
     renderArticle();
