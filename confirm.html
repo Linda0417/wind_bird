@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>确认</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        html,body{height:100%;overflow:hidden}
+        body{
+            background:#000;
+            color:#fff;
+            font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            padding:24px;
+            min-height:100vh;
+        }
+        .title{
+            color:#ff2a2a;
+            font-size:2rem;
+            font-weight:700;
+            margin-bottom:32px;
+            text-align:center;
+            transition:opacity 0.1s;
+        }
+        .desc{
+            color:#ddd;
+            font-size:0.9rem;
+            line-height:1.8;
+            max-width:480px;
+            text-align:center;
+            margin-bottom:48px;
+            word-break:break-all;
+        }
+        .btn-group{
+            display:flex;
+            gap:24px;
+        }
+        .btn{
+            background:#ff2a2a;
+            color:#000;
+            border:none;
+            padding:12px 32px;
+            font-size:1rem;
+            font-weight:700;
+            border-radius:4px;
+            cursor:pointer;
+            transition:transform 0.1s;
+        }
+        .btn:active{transform:scale(0.96)}
+        .blackout{
+            position:fixed;
+            inset:0;
+            background:#000;
+            opacity:0;
+            pointer-events:none;
+            transition:opacity 0.3s;
+            z-index:100;
+        }
+        body.fading .blackout{opacity:1;pointer-events:auto}
+        @media(max-width:720px){
+            .title{font-size:1.5rem}
+            .desc{font-size:0.8rem}
+            .btn{padding:10px 24px;font-size:0.9rem}
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title" id="title">您确定要继续吗</h1>
+    <p class="desc" id="desc">接下来的内容将与阅读无关。如果您偶然点到了这个按钮，您可以选择退出，这不会影响正常的阅读进程。当然，您也可以自由探索这部分内容。</p>
+    <div class="btn-group">
+        <button class="btn" id="btnContinue">继续</button>
+        <button class="btn" id="btnExit">退出</button>
+    </div>
+    <div class="blackout"></div>
+
+<script>
+const titleEl = document.getElementById("title");
+const descEl = document.getElementById("desc");
+const btnContinue = document.getElementById("btnContinue");
+const btnExit = document.getElementById("btnExit");
+
+const originalDesc = "接下来的内容将与阅读无关。如果您偶然点到了这个按钮，您可以选择退出，这不会影响正常的阅读进程。当然，您也可以自由探索这部分内容。";
+const originalTitle = "您确定要继续吗";
+const chars = "!@#$%^&*()_+-=[]{}|;:,.<>?/~`0123456789abcdefABCDEF";
+
+// 退出按钮：返回主页面
+btnExit.onclick = function(){
+    window.location.href = "./reading.html";
+};
+
+// 继续按钮：触发1秒动画
+btnContinue.onclick = function(){
+    btnContinue.disabled = true;
+    btnExit.disabled = true;
+    const start = Date.now();
+    const duration = 1000; // 整个动画1秒
+
+    function tick(){
+        const elapsed = Date.now() - start;
+        const progress = elapsed / duration;
+
+        // 阶段1(0~0.6s)：两个按钮文字都变成"继续"，描述乱码跳动，标题闪动
+        if(progress < 0.6){
+            btnExit.innerText = "继续";
+            // 乱码跳动
+            let garbled = "";
+            for(let i=0;i<originalDesc.length;i++){
+                garbled += chars[Math.floor(Math.random()*chars.length)];
+            }
+            descEl.innerText = garbled;
+            // 标题闪动：随机显示乱码或原文
+            titleEl.innerText = Math.random() > 0.5 ? originalTitle : "继续";
+            requestAnimationFrame(tick);
+        }
+        // 阶段2(0.6~1s)：标题固定为"继续"，画面逐渐变黑
+        else if(progress < 1){
+            titleEl.innerText = "继续";
+            document.body.classList.add("fading");
+            if(progress >= 1){
+                // 动画结束，跳转
+                window.location.href = "wwwwww";
+            }
+            requestAnimationFrame(tick);
+        }
+    }
+    tick();
+};
+</script>
+</body>
+</html>
